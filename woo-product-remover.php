@@ -92,6 +92,28 @@ function gk_wpr_prod_remove_db($remove_cats) {
 		"DELETE FROM ".$pref."posts WHERE post_type = 'product_variation';"
 	);
 	
+	//delete product's attachments
+	$attachments = get_posts( array( 
+		'post_type'   => 'attachment',
+		'numberposts' => -1,
+		'post_status' => null 
+	) );
+	$attachments_count = 0;
+	foreach( $attachments as $attachment ) {
+		
+		$parent_id = $attachment->post_parent;
+		$parent_post = get_post( $parent_id );
+		
+		if( ! $parent_post ) {
+			
+			wp_delete_attachment( $attachment->ID, true );
+			
+			$attachments_count++;
+			
+		}
+		
+	}
+	
 	if (is_numeric($prods_count)){
 		if ($prods_count == 0){
 			echo "No products found.";
@@ -105,6 +127,15 @@ function gk_wpr_prod_remove_db($remove_cats) {
 	if (is_numeric($vars_count)){
 		if ($vars_count > 0){
 			echo $vars_count." product variation(s) successfully removed!";
+			echo '<br />';
+		}
+	}
+	
+	// Echo if any attachments was deleted
+	echo '<br />';
+	if (is_numeric($attachments_count)){
+		if ($attachments_count > 0){
+			echo $attachments_count." product images successfully removed!";
 			echo '<br />';
 		}
 	}
